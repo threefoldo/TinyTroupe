@@ -172,16 +172,44 @@ class TinyPerson(JsonSerializableRegistry):
         if not hasattr(self, '_configuration'):          
             self._configuration = {
                 "name": self.name,
-                "age": None,
-                "nationality": None,
-                "country_of_residence": None,
-                "occupation": None,
-                "routines": [],
-                "occupation_description": None,
+                "demographics": {
+                    "age": None,
+                    "gender": None,
+                    "occupation": None,
+                    "education_level": None,
+                },
+                "goals_and_motivations": {
+                    "personal_ambitions": [],
+                    "professional_objectives": [],
+                    "social_aspirations": []
+                },
+                "challenges_and_pain_points": [],
+                "behaviors_and_habits": {
+                    "daily_routines": [],
+                    "hobbies": [],
+                    "typical_behaviors": []
+                },
                 "personality_traits": [],
-                "professional_interests": [],
-                "personal_interests": [],
-                "skills": [],
+                "preferences_and_interests": {
+                    "likes": [],
+                    "dislikes": [],
+                    "interests": []
+                },
+                "backstory": "",
+                "language_and_communication_style": {
+                    "formality": "",
+                    "preferred_vocabulary": [],
+                    "dialects_slang": []
+                },
+                "values_and_beliefs": {
+                    "ethical_views": [],
+                    "cultural_norms": []
+                },
+                "technology_usage": {
+                    "proficiency_level": "",
+                    "preferred_devices": [],
+                    "online_platforms": []
+                },
                 "relationships": [],
                 "current_datetime": None,
                 "current_location": None,
@@ -306,18 +334,37 @@ class TinyPerson(JsonSerializableRegistry):
 
         # dedent value if it is a string
         if isinstance(value, str):
-            value = textwrap.dedent(value)
+            value = textwrap.dedent(value).strip()
 
         if group is None:
             # logger.debug(f"[{self.name}] Defining {key}={value} in the person.")
+            if key not in self._configuration:
+                raise KeyError(f"No top-level field named '{key}' in configuration.")
             self._configuration[key] = value
         else:
+            # Navigate the configuration path
+            keys = group.split('.')
+            target = self._configuration
+            for k in keys:
+                if k not in target:
+                    raise KeyError(f"Group '{k}' not found in the configuration path.")
+                target = target[k]
+
+            # Now 'target' is the sub-structure identified by 'group'
+            # If 'key' is provided and 'target' is a dict, we set target[key] = value
+            # If 'key' is None and 'target' is a list, we append the value
             if key is not None:
-                # logger.debug(f"[{self.name}] Adding definition to {group} += [ {key}={value} ] in the person.")
-                self._configuration[group].append({key: value})
+                if isinstance(target, dict):
+                    # If it's a dict, we're defining a field in that dict
+                    target[key] = value
+                else:
+                    raise TypeError("Attempt to define a keyed value in a non-dict structure.")
             else:
-                # logger.debug(f"[{self.name}] Adding definition to {group} += [ {value} ] in the person.")
-                self._configuration[group].append(value)
+                # key is None, we assume 'target' should be a list, and we append 'value'
+                if isinstance(target, list):
+                    target.append(value)
+                else:
+                    raise TypeError("Attempt to append a value to a non-list structure.")
 
         # must reset prompt after adding to configuration
         self.reset_prompt()
@@ -1006,7 +1053,7 @@ class TinyPerson(JsonSerializableRegistry):
     @transactional
     def minibio(self, extended=True):
         """
-        Returns a mini-biography of the TinyPerson.
+        Returns a mini-biography of the TinyPerson using the new configuration structure.
 
         Args:
             extended (bool): Whether to include extended information or not.
@@ -1014,25 +1061,48 @@ class TinyPerson(JsonSerializableRegistry):
         Returns:
             str: The mini-biography.
         """
+        demographics = self._configuration.get("demographics", {})
+        age = demographics.get("age")
+        occupation = demographics.get("occupation")
+        cultural_norms = self._configuration.get("values_and_beliefs", {}).get("cultural_norms", [])
+        current_location = self._configuration.get("current_location")
 
-        base_biography = f"{self.name} is a {self._configuration['age']} year old {self._configuration['occupation']}, {self._configuration['nationality']}, currently living in {self._configuration['country_of_residence']}."
+        # Construct a base biography string
+        # If age or occupation is missing, we provide a fallback description.
+        age_str = f"{age} year old" if age is not None else "an individual of unspecified age"
+        occupation_str = occupation if occupation else "an individual with no specified occupation"
+
+        # Cultural background from cultural_norms (if available)
+        if cultural_norms:
+            # Join cultural norms into a readable phrase
+            cultural_background = " with a background influenced by " + " and ".join(cultural_norms)
+        else:
+            cultural_background = ""
+
+        # Current location
+        if current_location:
+            location_str = f", currently located in {current_location}"
+        else:
+            location_str = ""
+
+        base_biography = f"{self.name} is a {age_str} {occupation_str}{cultural_background}{location_str}."
 
         if self._extended_agent_summary is None and extended:
             logger.debug(f"Generating extended agent summary for {self.name}.")
             self._extended_agent_summary = openai_utils.LLMRequest(
-                                                system_prompt="""
-                                                You are given a short biography of an agent, as well as a detailed specification of his or her other characteristics
-                                                You must then produce a short paragraph (3 or 4 sentences) that **complements** the short biography, adding details about
-                                                personality, interests, opinions, skills, etc. Do not repeat the information already given in the short biography.
-                                                repeating the information already given. The paragraph should be coherent, consistent and comprehensive. All information
-                                                must be grounded on the specification, **do not** create anything new.
-                                                """, 
+                system_prompt="""
+                You are given a short biography of an agent, as well as a detailed specification of his or her other characteristics
+                You must then produce a short paragraph (3 or 4 sentences) that complements the short biography, adding details about
+                personality, interests, opinions, skills, etc. Do not repeat the information already given in the short biography.
+                The paragraph should be coherent, consistent and comprehensive. All information must be grounded on the specification,
+                do not create anything new.
+                """,
+                user_prompt=f"""
+                **Short biography:** {base_biography}
 
-                                                user_prompt=f"""
-                                                **Short biography:** {base_biography}
-
-                                                **Detailed specification:** {self._configuration}
-                                                """).call()
+                **Detailed specification:** {self._configuration}
+                """
+            ).call()
 
         if extended:
             biography = f"{base_biography} {self._extended_agent_summary}"
@@ -1040,6 +1110,7 @@ class TinyPerson(JsonSerializableRegistry):
             biography = base_biography
 
         return biography
+
 
     def pp_current_interactions(
         self,

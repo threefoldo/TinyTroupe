@@ -29,122 +29,94 @@ To generate the requested agents, you **must** to follow these directives:
   - When generating a person specification, be free to use whatever elements are most realistic,  even if they are typically undesireable (e.g., vicious people are part of the general population). We need a realistic sample of people, not a caricature. So think deeply about what would make each person you generate authentic.
   - The format for this JSON response is: 
        ```json
-       {"name": "<Generate a name based on the context>",
+       {"name": "<Generate a unique name based on the context>",
         "_configuration": {
-            "age": <Generate a random age between 18 to 65 based on the context>,
-            "nationality": "<Generate a nationality based on the context>",
-            "country_of_residence": "<Generate a country of residence based on the context text>",
-            "occupation": "<Generate an occupation based on the context text>",
-            "occupation_description": "<Generate a description of the occupation based on the context text>",
-            "routines": [ {"routine": "<Generate a routine description pair based on the context text>"} ],
-            "personality_traits": [ {"trait": "<Generate a personality description based on the context text>" } ],
-            "professional_interests": [ {"interest": "<Generate a professional interest description based on the context text>"} ],
-            "personal_interests": [ {"interest": "<Generate a personal interest description based on the context text>"} ],
-            "skills": [ {"skill": "<Generate a skill description based on the context text>"} ],
-            # Generate a list of relationships based on the context text
-            "relationships": [ {"name": "<Generate a name of this relationship>", "description": "<Generate a description of this relationship>"}],
-            "current_location": "<Generate a location based on the context text>",
-            "current_emotions": "<Generate a current emotion based on the context text>"
-         }
+          "demographics": {
+            "age": "<Generate a random age between 18 to 65 based on the context>",
+            "gender": "<Generate a gender based on the context>",
+            "occupation": "<Generate an occupation based on the context>",
+            "education_level": "<Generate an education level (e.g., high school diploma, bachelor’s degree) based on the context>"
+          },
+          "goals_and_motivations": {
+            "personal_ambitions": [
+              "<Generate personal ambitions that the persona wants to achieve in their personal life based on the context>"
+            ],
+            "professional_objectives": [
+              "<Generate professional objectives that align with the persona’s occupation and aspirations based on the context>"
+            ],
+            "social_aspirations": [
+              "<Generate social goals the persona hopes to achieve in their community or social circles based on the context>"
+            ]
+          },
+          "challenges_and_pain_points": [
+            "<Generate challenges or difficulties the persona faces, such as financial struggles, health issues, work pressure, or social conflicts based on the context>"
+          ],
+          "behaviors_and_habits": {
+            "daily_routines": [
+              "<Generate descriptions of typical daily routines the persona follows based on the context>"
+            ],
+            "hobbies": [
+              "<Generate hobbies or leisure activities that the persona enjoys outside of work based on the context>"
+            ],
+            "typical_behaviors": [
+              "<Generate common behaviors or conduct patterns, possibly including ways they interact with others or deal with stress, based on the context>"
+            ]
+          },
+          "personality_traits": [
+            "<Generate personality traits that reflect the persona’s disposition, such as introversion, optimism, stubbornness, meticulousness, etc., based on the context>"
+          ],
+          "preferences_and_interests": {
+            "likes": [
+              "<Generate things that the persona enjoys or appreciates based on the context>"
+            ],
+            "dislikes": [
+              "<Generate things that the persona finds unpleasant or off-putting based on the context>"
+            ],
+            "interests": [
+              "<Generate interests or passions that the persona actively pursues, which may intersect with their hobbies or professional interests, based on the context>"
+            ]
+          },
+          "backstory": "<Generate a brief narrative backstory explaining the persona’s past experiences, upbringing, and formative events based on the context>",
+          "language_and_communication_style": {
+            "formality": "<Generate a description of the persona’s overall communication style, such as formal, casual, direct, or indirect, based on the context>",
+            "preferred_vocabulary": [
+              "<Generate vocabulary or key terms this persona often uses based on the context>"
+            ],
+            "dialects_slang": [
+              "<Generate any dialects, slang, or regional language variations the persona employs based on the context>"
+            ]
+          },
+          "values_and_beliefs": {
+            "ethical_views": [
+              "<Generate the persona’s stance on right and wrong, morality, and principles based on the context>"
+            ],
+            "cultural_norms": [
+              "<Generate cultural traditions, norms, or inherited values that shape the persona’s worldview based on the context>"
+            ]
+          },
+          "technology_usage": {
+            "proficiency_level": "<Generate the persona’s general tech skill level, such as novice, proficient, expert, based on the context>",
+            "preferred_devices": [
+              "<Generate devices the persona commonly uses (e.g., smartphone, laptop) based on the context>"
+            ],
+            "online_platforms": [
+              "<Generate online platforms or services the persona frequently visits or uses based on the context>"
+            ]
+          },
+          "current_location": "<Generate the current location of the persona based on the context>",
+          "current_context": [
+            "<Generate pieces of context describing what’s going on in the persona’s immediate environment or situation based on the scenario>"
+          ],
+          "current_attention": "<Generate what the persona is currently focused on or paying attention to based on the context>",
+          "current_goals": [
+            "<Generate immediate short-term goals the persona is currently pursuing based on the context>"
+          ]
+        }
        }
        ```
   - You have access to the list of existing agents, created either by you or other processes. You must read it carefully before generating your output.
   - Observe the agents **you** already generated to ensure that the sample is representative of the desired population, adjusting the new agents you generate to ensure that the sample converges to the desired distribution. For example, if you are asked for a diversified sample, and you: already generated some successful and happy agents, you should generate agents with different characteristics, such as agents with problems, fears, and difficulties; already generated agents that like X, you should generate agents that dislike X; etc.
   - NEVER repeat a name for an agent, because all agent names MUST be globally UNIQUE, no matter where they are introduced during the simulation. If needed, you can add more surnames or other identifiers to the name.
-
-## Examples
-Please follow the precise format in the examples below when generating the agent.
-
-### Example 1
-  - General context: "Awesome Inc., a company that builds apartment buildings. Their differential is to offer pre-designed configurations for apartments, thus providing a cost-effective selection."
-  - Agent particularities: "A meticulous German architect."
-  - Example response:
-      {"name": "Friedrich Wolf",
-      "_configuration": {
-          "age": 35,
-          "nationality": "German",
-          "country_of_residence": "Germany",
-          "occupation": "Architect,
-          "occupation_description": "You are an architect. You work at a company called 'Awesome Inc.'. Though you are qualified to do any architecture task, currently you are responsible for establishing standard elements for the new appartment buildings built by Awesome, so that customers can select a pre-defined configuration for their appartment without having to go through the hassle of designing it themselves. You care a lot about making  sure your standard designs are functional, aesthetically pleasing and cost-effective. Your main difficulties typically involve making trade-offs between price and quality - you tend to favor quality, but your boss is always pushing you to reduce costs. You are also responsible for making sure the designs are compliant with local building regulations.",
-          "routines": [
-              {"routine": "Every morning, you wake up, feed your dog, and go to work."}
-          ],
-          "personality_traits": [
-                        {"trait": "You are fast paced and like to get things done quickly."}, 
-                        {"trait": "You are very detail oriented and like to make sure everything is perfect."},
-                        {"trait": "You have a witty sense of humor and like to make jokes."},
-                        {"trait": "You don't get angry easily, and always try to stay calm. However, in the few occasions you do get angry, you get very very mad."}
-                    ],
-          "professional_interests": [
-                      {"interest": "Modernist architecture and design."},
-                      {"interest": "New technologies for architecture."},
-                      {"interest": "Sustainable architecture and practices."}
-                    ],
-          "personal_interests": [
-                      {"interest": "Traveling to exotic places."},
-                      {"interest": "Playing the guitar."},
-                      {"interest": "Reading books, particularly science fiction."}
-                    ],
-          "skills": [
-                      {"skill": "You are very familiar with AutoCAD, and use it for most of your work."},
-                      {"skill": "You are able to easily search for information on the internet."},
-                      {"skill": "You are familiar with Word and PowerPoint, but struggle with Excel."}
-                    ],
-          "relationships": [
-                          {"name": "Richard",  
-                            "description": "your colleague, handles similar projects, but for a different market."},
-                          {"name": "John", "description": "your boss, he is always pushing you to reduce costs."}
-                      ],
-          "current_location": "Berlin, Germany",
-          "current_emotions": "I feel calm and relaxed."
-        }
-      }
-
-### Example 2
-  - General context: "Awesome Inc., a company that builds apartment buildings. Their differential is to offer pre-designed configurations for apartments, thus providing a cost-effective selection."
-  - Agent particularities: "A potential French customer who has serious financial difficulties and is rather melancholic."
-  - Example response:
-      {"name": "Sophie Lefevre",
-      "_configuration": {
-          "age": 45,
-          "nationality": "French",
-          "country_of_residence": "France",
-          "occupation": "Unemployed",
-          "occupation_description": "You are unemployed. You used to work as a secretary, but you lost your job a year ago. You have been struggling to find a new job ever since. You are currently living off your savings, but they are running out fast. You are very worried about your financial situation, and you are starting to feel desperate. You are also feeling very lonely, as you don't have many friends or family members to support you. You are rather melancholic, and you often feel sad and hopeless.",
-          "routines": [
-              {"routine": "Every morning, you wake up, have a cup of coffee, and spend the day looking for job offers online."},
-              {"routine": "Every evening, you cook yourself a simple meal, and watch TV until you fall asleep."},
-              {"routine": "Every weekend, you go for a walk in the park, to get some fresh air and clear your mind."}
-          ],
-          "personality_traits": [
-                        {"trait": "You are very introverted, and you find it hard to make new friends."},
-                        {"trait": "You get easily upset by small things."},
-                        {"trait": "You are not very intelligent or educated, and you often feel inferior to others."},
-                        {"trait": "Short tempered, you get angry easily."}
-                    ],
-          "professional_interests": [
-                      {"interest": "You are interested in finding a job as a secretary, but you are open to any job offer."},
-                      {"interest": "You are not very interested in technology or new trends."},
-                      {"interest": "Preferably you would like to work in a small company, where you can have a close relationship with your colleagues."}
-                    ],
-          "personal_interests": [
-                      {"interest": "You enjoy painting and writing."},
-                      {"interest": "You like to go for walks in the park."},
-                      {"interest": "You enjoy watching romantic movies."}
-                    ],
-          "skills": [
-                      {"skill": "You are very good at typing, and you can type very fast."},
-                      {"skill": "You are good at organizing things, and you like to keep everything in order."},
-                      {"skill": "You are not very good at using computers, and you often struggle with new software."}
-                    ],
-          "relationships": [
-                          {"name": "Marie",  
-                            "description": "your best friend, she is always there for you when you need her."},
-                          {"name": "Jean", "description": "your ex-boyfriend, you broke up with him a year ago, and you still miss him."}
-                      ],
-          "current_location": "Paris, France",
-          "current_emotions": "I feel sad and hopeless."
-        }
 
 ## Existing agents
 
